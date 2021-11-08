@@ -46,8 +46,6 @@ class Post():
         except:
             return {'Error': 'Post not found'}, 404
 
-        return post
-
     def save(self):
         _id = db.posts.insert_one(self.__dict__).inserted_id
 
@@ -62,18 +60,14 @@ class Post():
 
     @staticmethod
     def delete(id):
-        posts_list = list(db.posts.find())
+        post = db.posts.find_one({'id': id})
 
-        for post in posts_list:
-
+        try:
             del post['_id']
-
-            if post['id'] == id:
-                post_filtered = post
-
-        db.posts.delete_one(post_filtered)
-
-        return post_filtered, 200
+            db.posts.delete_one(post)
+            return post
+        except:
+            return {'Error': 'Post not found'}, 404
 
     def update(self, id):
         post = db.posts.find_one({'id': id})
