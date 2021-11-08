@@ -38,17 +38,15 @@ class Post():
 
     @staticmethod
     def get_post_by_id(id):
+        post = db.posts.find_one({'id': id})
 
-        posts_list = list(db.posts.find())
-
-        for post in posts_list:
-
+        try:
             del post['_id']
+            return post
+        except:
+            return {'Error': 'Post not found'}, 404
 
-            if post['id'] == id:
-                post_filtered = post
-
-        return post_filtered
+        return post
 
     def save(self):
         _id = db.posts.insert_one(self.__dict__).inserted_id
