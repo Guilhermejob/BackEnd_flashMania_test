@@ -1,9 +1,6 @@
 from pymongo import MongoClient
 from datetime import date, datetime
 
-from pymongo.message import update
-
-from app.exceptions.posts_exceptions import InvalidPostError
 
 client = MongoClient('mongodb://localhost:27017/')
 
@@ -12,7 +9,7 @@ db = client['kenzie']
 
 class Post():
 
-    def __init__(self, title: str, author: str, tags: list = [], content: str = ''):
+    def __init__(self, title, author, tags, content):
         self.create_at = datetime.now().strftime('%d/%m/%Y')
         self.title = title
         self.author = author
@@ -20,7 +17,7 @@ class Post():
         self.content = content
 
     def validate(**kwargs):
-        required_keys = ['id', 'title', 'author', 'tags', 'content']
+        required_keys = ['title', 'author', 'tags', 'content']
 
         for key in required_keys:
             if key not in kwargs:
@@ -30,6 +27,7 @@ class Post():
     def get_all():
 
         posts_list = list(db.posts.find())
+        # db.posts.remove()
 
         for post in posts_list:
             del post['_id']
@@ -47,14 +45,20 @@ class Post():
             return {'Error': 'Post not found'}, 404
 
     def save(self):
-        _id = db.posts.insert_one(self.__dict__).inserted_id
+        users_list = Post.get_all()
 
-        if not _id:
-            raise InvalidPostError
+        if len(users_list) == 0:
+            self.__dict__['id'] = len(users_list)+1
+        else:
+            self.__dict__['id'] = users_list[-1]['id'] + 1
+
+        _id = db.posts.insert_one(self.__dict__).inserted_id
 
         new_post = db.posts.find_one({'_id': _id})
 
         del new_post['_id']
+
+        print(new_post)
 
         return new_post
 
@@ -75,6 +79,7 @@ class Post():
         try:
             update = {
                 "$set": {
+                    "id": id,
                     "title": self.title,
                     "author": self.author,
                     "tags": self.tags,

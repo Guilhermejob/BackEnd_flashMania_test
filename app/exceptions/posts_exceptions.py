@@ -1,11 +1,11 @@
-class InvalidPostError(Exception):
-    ...
-
-
 class TypeNotAllowedError(Exception):
     types = {
         str: "string",
+        int: "integer",
+        float: "float",
         list: "list",
+        dict: "dictionary",
+        bool: "boolean",
     }
 
     def __init__(self, title, author, tags, content):

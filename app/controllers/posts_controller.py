@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from app.exceptions.posts_exceptions import InvalidPostError, TypeNotAllowedError
+from app.exceptions.posts_exceptions import TypeNotAllowedError
 from app.models.posts_model import Post
 
 
@@ -7,6 +7,7 @@ def init_app(app: Flask):
 
     @app.get('/posts')
     def get_all_posts():
+
         users_list = Post.get_all()
         return jsonify(users_list)
 
@@ -17,19 +18,19 @@ def init_app(app: Flask):
 
     @app.post('/posts')
     def create_post():
-        users_list = Post.get_all()
-
         data = request.json
-        data['id'] = len(users_list)
 
         try:
-            Post.validate(**data)
+            if type(data['title']) != str or type(data['author']) != str or type(data['tags']) != list or type(data['content']) != str:
+                raise TypeNotAllowedError(
+                    data['title'], data['author'], data['tags'], data['content'])
             post = Post(**data)
-            new_post = post.save()
-            return new_post, 201
+            created_post = post.save()
+            return created_post
 
-        except (InvalidPostError):
-            return {'Message': 'Dados invalidos para a criação de um post'}, 400
+        except TypeNotAllowedError as err:
+            print(err.message)
+            return err.message, 400
 
     @app.delete('/posts/<int:id>')
     def delete_post(id: int):
@@ -38,8 +39,9 @@ def init_app(app: Flask):
 
     @app.patch('/posts/<int:id>')
     def update_post(id: int):
+        data = request.json
+
         try:
-            data = request.json
             title = data['title']
             author = data['author']
             tags = data['tags']
@@ -49,6 +51,7 @@ def init_app(app: Flask):
                 if type(title) != str or type(author) != str or type(tags) != list or type(content) != str:
                     raise TypeNotAllowedError(title, author, tags, content)
                 post = Post(**data)
+                post.__dict__['id'] = id
                 update_post = post.update(id)
                 return update_post
             except TypeNotAllowedError as err:
