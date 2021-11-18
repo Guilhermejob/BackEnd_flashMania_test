@@ -21,16 +21,24 @@ def init_app(app: Flask):
         data = request.json
 
         try:
-            if type(data['title']) != str or type(data['author']) != str or type(data['tags']) != list or type(data['content']) != str:
-                raise TypeNotAllowedError(
-                    data['title'], data['author'], data['tags'], data['content'])
-            post = Post(**data)
-            created_post = post.save()
-            return created_post
+            title = data['title']
+            author = data['author']
+            tags = data['tags']
+            content = data['content']
 
-        except TypeNotAllowedError as err:
-            print(err.message)
-            return err.message, 400
+            try:
+                if type(title) != str or type(author) != str or type(tags) != list or type(content) != str:
+                    raise TypeNotAllowedError(title, author, tags, content)
+                post = Post(**data)
+                created_post = post.save()
+                return created_post
+
+            except TypeNotAllowedError as err:
+                print(err.message)
+                return err.message, 400
+
+        except KeyError as err:
+            return {'error': f'Missing key {err}'}, 400
 
     @app.delete('/posts/<int:id>')
     def delete_post(id: int):
