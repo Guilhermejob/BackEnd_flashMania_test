@@ -8,18 +8,15 @@ class TypeNotAllowedError(Exception):
         bool: "boolean",
     }
 
-    def __init__(self, title, author, tags, content):
+    def __init__(self, name, price, content):
 
         self.message = {
             'wrong fields': [
                 {
-                    "title": f'{self.types[type(title)]}'
+                    "title": f'{self.types[type(name)]}'
                 },
                 {
-                    "author": f'{self.types[type(author)]}'
-                },
-                {
-                    "tags": f'{self.types[type(tags)]}'
+                    "price": f'{self.types[type(price)]}'
                 },
                 {
                     "content": f'{self.types[type(content)]}'
