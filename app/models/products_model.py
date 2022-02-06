@@ -1,19 +1,24 @@
 from pymongo import MongoClient
 from datetime import datetime
-
+from dataclasses import dataclass
 
 client = MongoClient('mongodb://localhost:27017/')
 
 db = client['TestTec']
 
+# @dataclass
+#
+
 
 class Products():
-
-    def __init__(self, name, price, content):
+    #
+    def __init__(self, name, price, content, img, img_name):
         self.create_at = datetime.now().strftime('%d/%m/%Y')
         self.name = name
         self.price = price
         self.content = content
+        self.img = img
+        self.img_name = img_name
 
     def validate(**kwargs):
         required_keys = ['name', 'price', 'content']
@@ -24,9 +29,8 @@ class Products():
 
     @staticmethod
     def get_all():
-
+        # db.TestTec.remove()
         products_list = list(db.TestTec.find())
-        # db.products.remove()
 
         for product in products_list:
             del product['_id']
@@ -80,7 +84,9 @@ class Products():
                     "name": self.name,
                     "price": self.price,
                     "content": self.content,
-                    "updated_at": datetime.now().strftime('%d/%m/%Y')
+                    "updated_at": datetime.now().strftime('%d/%m/%Y'),
+                    "img": self.img,
+                    "img_name": self.img_name
                 }
             }
             db.TestTec.update_one(products, update)
